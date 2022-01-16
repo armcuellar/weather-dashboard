@@ -1,0 +1,17 @@
+/* adjust the image of the current weather icon */
+.currentWeather img {
+    height: 15%;
+    width: 15%;
+}
+
+/* added gradient style to title of the webpage */
+.title {
+    background-image: linear-gradient(225deg, rgb(38, 53, 255), rgb(57, 57, 85));
+    color: white;
+}
+
+/* add style to the submit button */
+.submit-btn {
+    background-image: linear-gradient(rgb(38, 53, 255), rgb(57, 57, 85));
+    color: white;
+}
