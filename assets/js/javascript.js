@@ -1,7 +1,9 @@
 var citySearchEl = document.querySelector(".citySearch");
 var currentWeatherEl = document.querySelector(".currentWeather");
 var fiveDayWeatherEl = document.querySelector(".fiveDayWeather");
+var recentSearchEl = document.querySelector(".recentSearch");
 var cityInputEl = document.querySelector("#city");
+var cityInfo = [];
 
 // function to obtain city's coordinates
 var searchCity = function (event) {
@@ -22,6 +24,8 @@ var searchCity = function (event) {
                     var lon = data.coord.lon;
 
                     cityWeather(city, lat, lon);
+                    recentSearch(city, lat, lon);
+                    saveSearch(city, lat, lon);
                 });
             }
             else {
@@ -73,10 +77,7 @@ var cityWeather = function (city, latt, long) {
                     currentWeatherEl.appendChild(humidityText);
                     currentWeatherEl.appendChild(uvIndexText);
 
-
-                    if (data != undefined) {
-                        futureWeather(data);
-                    }
+                    futureWeather(data);
                 });
             }
             else {
@@ -87,6 +88,7 @@ var cityWeather = function (city, latt, long) {
             alert("There is an error obtaining data");
         });
 }
+
 var futureWeather = function (data) {
     console.log(data.daily);
     fiveDayWeatherEl.textContent = ""
@@ -102,7 +104,6 @@ var futureWeather = function (data) {
 
         var weatherIcon = document.createElement("img");
         weatherIcon.src = "http://openweathermap.org/img/wn/" + futureData[i].weather[0].icon + "@2x.png";
-        // end of weather icon code 
 
         var tempText = document.createElement("p");
         tempText.textContent = "Temp: " + futureData[i].temp.day + " °F";
@@ -120,5 +121,49 @@ var futureWeather = function (data) {
     }
 
 }
+var saveSearch = function (cityName, latitude, longitude) {
 
+    var cityObj = {
+        city: cityName,
+        lat: latitude,
+        lon: longitude,
+    }
+    cityInfo.push(cityObj)
+    save();
+}
+var save = function () {
+    localStorage.setItem("weatherCity", JSON.stringify(cityInfo));
+}
+var recentSearch = function (cityName, latitude, longitude) {
+    var recentCity = document.createElement("button");
+    recentCity.textContent = cityName;
+    recentCity.lat = latitude;
+    recentCity.lon = longitude;
+    recentSearchEl.append(recentCity);
+}
+var retrieveCity = function (event) {
+    var city = event.target.textContent;
+    var lat = event.target.lat;
+    var lon = event.target.lon;
+
+    cityWeather(city, lat, lon);
+}
+var load = function () {
+    var searchHistory = localStorage.getItem("weatherCity")
+    if (!searchHistory) {
+        return false;
+    }
+    searchHistory = JSON.parse(searchHistory);
+
+    for (i = 0; i < searchHistory.length; i++) {
+        cityInfo.push(searchHistory[i]);
+        var city = searchHistory[i].city;
+        var lat = searchHistory[i].lat;
+        var lon = searchHistory[i].lon;
+
+        recentSearch(city, lat, lon);
+    }
+}
 citySearchEl.addEventListener("submit", searchCity);
+recentSearchEl.addEventListener("click", retrieveCity);
+load();
