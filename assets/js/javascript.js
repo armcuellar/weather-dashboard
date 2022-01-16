@@ -37,7 +37,8 @@ var searchCity = function (event) {
 
 // function to use city coordinates to get weather data
 var cityWeather = function (city, latt, long) {
-    var weatherApi = "https://api.openweathermap.org/data/2.5/onecall?lat=" + latt + "&lon=" + long + "&appid=cc93eb9259444b15987361c38b14835c";
+
+    var weatherApi = "https://api.openweathermap.org/data/2.5/onecall?lat=" + latt + "&lon=" + long + "&units=imperial&appid=cc93eb9259444b15987361c38b14835c";
 
     currentWeatherEl.textContent = "";
 
@@ -46,60 +47,36 @@ var cityWeather = function (city, latt, long) {
             // request was successful
             if (response.ok) {
                 response.json().then(function (data) {
-                    var date = city.toUpperCase() + " " + moment.unix(data.current.dt).format("MMM Do, YYYY");
+                    var current = data.current;
+                    var date = city.toUpperCase() + " " + moment.unix(current.dt).format("ddd MMM Do, YYYY");
 
                     var cityTitle = document.createElement("h2");
                     cityTitle.textContent = date;
 
-                    // Checks weather code and returns icon image
-                    var weatherCode = data.current.weather[0].id;
-
-                    if (200 <= weatherCode && weatherCode <= 232) {
-                        var icon = "11d";
-                    }
-                    else if (300 <= weatherCode && weatherCode <= 321) {
-                        var icon = "09d";
-                    }
-                    else if (500 <= weatherCode && weatherCode <= 504) {
-                        var icon = "10d";
-                    }
-                    else if (weatherCode == 511) {
-                        var icon = "13d";
-                    }
-                    else if (520 <= weatherCode && weatherCode <= 531) {
-                        var icon = "09d";
-                    }
-                    else if (600 <= weatherCode && weatherCode <= 622) {
-                        var icon = "13d";
-                    }
-                    else if (701 <= weatherCode && weatherCode <= 781) {
-                        var icon = "50d";
-                    }
-                    else if (weatherCode == 800) {
-                        var icon = "01d";
-                    }
-                    else if (weatherCode == 801) {
-                        var icon = "02d";
-                    }
-                    else if (weatherCode == 802) {
-                        var icon = "03d";
-                    }
-                    else if (803 <= weatherCode && weatherCode <= 804) {
-                        var icon = "04d";
-                    }
-
                     var weatherIcon = document.createElement("img");
-                    weatherIcon.src = "http://openweathermap.org/img/wn/" + icon + "@2x.png";
+                    weatherIcon.src = "http://openweathermap.org/img/wn/" + current.weather[0].icon + "@2x.png";
                     // end of weather icon code 
+
+                    var tempText = document.createElement("p");
+                    tempText.textContent = "Temp: " + current.temp + " °F";
+                    var windText = document.createElement("p");
+                    windText.textContent = "Wind: " + current.wind_speed + " MPH";
+                    var humidityText = document.createElement("p");
+                    humidityText.textContent = "Humidity: " + current.humidity + " %";
+                    var uvIndexText = document.createElement("p");
+                    uvIndexText.textContent = "UV Index: " + current.uvi;
 
                     currentWeatherEl.appendChild(cityTitle);
                     currentWeatherEl.appendChild(weatherIcon);
+                    currentWeatherEl.appendChild(tempText);
+                    currentWeatherEl.appendChild(windText);
+                    currentWeatherEl.appendChild(humidityText);
+                    currentWeatherEl.appendChild(uvIndexText);
 
-                    console.log(weatherCode);
 
-                    console.log(weatherApi);
-                    console.log(date);
-
+                    if (data != undefined) {
+                        futureWeather(data);
+                    }
                 });
             }
             else {
@@ -109,10 +86,38 @@ var cityWeather = function (city, latt, long) {
         .catch(function (error) {
             alert("There is an error obtaining data");
         });
+}
+var futureWeather = function (data) {
+    console.log(data.daily);
+    fiveDayWeatherEl.textContent = ""
 
+    var futureData = data.daily;
 
+    // checks 5 day forcast
+    for (i = 1; i < 6; i++) {
+        var date = moment.unix(data.daily[i].dt).format("ddd MMM Do, YYYY");
 
+        var cityTitle = document.createElement("h3");
+        cityTitle.textContent = date;
 
+        var weatherIcon = document.createElement("img");
+        weatherIcon.src = "http://openweathermap.org/img/wn/" + futureData[i].weather[0].icon + "@2x.png";
+        // end of weather icon code 
+
+        var tempText = document.createElement("p");
+        tempText.textContent = "Temp: " + futureData[i].temp.day + " °F";
+        var windText = document.createElement("p");
+        windText.textContent = "Wind: " + futureData[i].wind_speed + " MPH";
+        var humidityText = document.createElement("p");
+        humidityText.textContent = "Humidity: " + futureData[i].humidity + " %";
+
+        fiveDayWeatherEl.appendChild(cityTitle);
+        fiveDayWeatherEl.appendChild(weatherIcon);
+        fiveDayWeatherEl.appendChild(tempText);
+        fiveDayWeatherEl.appendChild(windText);
+        fiveDayWeatherEl.appendChild(humidityText);
+
+    }
 
 }
 
